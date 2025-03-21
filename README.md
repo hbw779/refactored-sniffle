@@ -1,6 +1,6 @@
 # 章鱼哥的自我介绍
 
-<img src="https://raw.githubusercontent.com/Winnie-Qi/dev_skills/main/images/squidward.jpg" width="200" alt="章鱼哥形象">
+<img src="https://github.com/hzh-hl/refactored-sniffle/blob/main/image/ee1047e7e5b7a7fd994c771295608b4.jpg" width="200" alt="章鱼哥形象">
 
 大家好，我是**章鱼哥**，我的身份是*蟹堡王的收银员*。以下是我的自我介绍：
 
@@ -43,7 +43,7 @@ print(np.array([1, 2, 3]) ** 2)
 其中执行`print(np.array([1, 2, 3]) ** 2)`可输出结果。
 
 ### 我最喜欢的环境管理工具是conda
-<img src="https://raw.githubusercontent.com/Winnie-Qi/dev_skills/main/images/pic1.jpg" width="800" alt="截图一">
+<img src="https://github.com/hzh-hl/refactored-sniffle/blob/main/image/ae4a9df95b4e927c7e9f7059819089b.png" width="800" alt="截图一">
 
 ### 我可以在IDE上使用我建立的虚拟环境
-<img src="https://raw.githubusercontent.com/Winnie-Qi/dev_skills/main/images/pic2.jpg" width="800" alt="截图二">
+<img src="https://github.com/hzh-hl/refactored-sniffle/blob/main/image/ac2063a98707fe6a5045844c8055554.png" width="800" alt="截图二">
