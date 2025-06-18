@@ -6,9 +6,8 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 ```
 ### pandas用于数据处理和分析，CountVectorizer 和 TfidfVectorizer这两个类用于文本特征提取。
-# 项目
-## 代码核心功能说明
-### 1. 获取邮件内容并切词处理 (get_words 函数)
+
+### 2. 获取邮件内容并切词处理 (get_words 函数)
 ```python
 def get_words(filename):
     words = []
@@ -21,7 +20,7 @@ def get_words(filename):
             words.extend(line)
     return words
 ```
-### 2.构建词汇表并提取频率较高的词(get_top_words 函数)
+### 3.构建词汇表并提取频率较高的词(get_top_words 函数)
 ```python
 def get_top_words(top_num):
     filename_list = ['邮件_files/{}.txt'.format(i) for i in range(151)]
@@ -30,7 +29,7 @@ def get_top_words(top_num):
     freq = Counter(chain(*all_words))  # 统计词频
     return [i[0] for i in freq.most_common(top_num)]  # 返回前 top_num 个高频词
 ```
-### 3. 构建邮件的词向量 (vector 生成部分)
+### 4. 构建邮件的词向量 (vector 生成部分)
 ```python
 vector = []
 for words in all_words:
@@ -38,12 +37,12 @@ for words in all_words:
     vector.append(word_map)
 vector = np.array(vector)  # 转换为 NumPy 数组
 ```
-### 4.构建分类模型 (MultinomialNB Naive Bayes 模型)
+### 5.构建分类模型 (MultinomialNB Naive Bayes 模型)
 ```python
 model = MultinomialNB()  # 初始化多项式朴素贝叶斯模型
 model.fit(vector, labels)  # 使用词频向量和标签进行训练
 ```
-### 5. 对未知邮件进行分类 (predict 函数)
+### 6. 对未知邮件进行分类 (predict 函数)
 ```python
 def predict(filename):
     words = get_words(filename)  # 预处理新邮件
@@ -51,7 +50,7 @@ def predict(filename):
     result = model.predict(current_vector.reshape(1, -1))  # 预测结果
     return '垃圾邮件' if result == 1 else '普通邮件'
 ```
-### 6. 使用 SMOTE 进行数据平衡（后续部分）
+### 7. 使用 SMOTE 进行数据平衡（后续部分）
 ```python
 smote = SMOTE(sampling_strategy='auto', random_state=42)
 X_res, y_res = smote.fit_resample(X_train, y_train)
