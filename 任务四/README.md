@@ -6,67 +6,83 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 ```
 ### pandas用于数据处理和分析，CountVectorizer 和 TfidfVectorizer这两个类用于文本特征提取。
-## 2. 定义 FeatureExtractor 类
+# 项目
+## 代码核心功能说明
+### 1. 获取邮件内容并切词处理 (get_words 函数)
 ```python
-class FeatureExtractor:  
-    def __init__(self, method='tf-idf'):  
-        # 选择特征提取方法  
-        self.method = method  
-        if self.method == 'tf-idf':  
-            self.vectorizer = TfidfVectorizer()  
-        elif self.method == 'count':  
-            self.vectorizer = CountVectorizer()  
-        else:  
-            raise ValueError("Invalid method. Choose 'tf-idf' or 'count'.")
-  ```
-### 构造函数，根据 method 创建相应的特征提取器，如果 method 无效，抛出 ValueError 异常。
-## 3. 特征提取方法
-```python
-def fit_transform(self, documents):  
-    # 适合并转换文档  
-    return self.vectorizer.fit_transform(documents)
-  ```
-### fit_transform 方法，使用所选的 vectorizer 对文档进行拟合和转换，返回特征矩阵。
-## 4. 获取特征名称
-```python
-def get_feature_names(self):  
-    # 获取特征名称  
-    return self.vectorizer.get_feature_names_out()
+def get_words(filename):
+    words = []
+    with open(filename, 'r', encoding='utf-8') as fr:
+        for line in fr:
+            line = line.strip()
+            line = re.sub(r'[.【】0-9、——。，！~\*]', '', line)  # 过滤无效字符
+            line = cut(line)  # jieba分词
+            line = filter(lambda word: len(word) > 1, line)  # 过滤长度为1的词
+            words.extend(line)
+    return words
 ```
-###  get_feature_names 方法，返回当前特征提取器所提取出的特征名称。
-## 5. 示例数据
+### 2.构建词汇表并提取频率较高的词(get_top_words 函数)
 ```python
-# 示例数据  
-documents = [  
-    "这是第一个文档。",  
-    "这是第二个文档，这是一个示例。",  
-    "这是第三个文档。",  
+def get_top_words(top_num):
+    filename_list = ['邮件_files/{}.txt'.format(i) for i in range(151)]
+    for filename in filename_list:
+        all_words.append(get_words(filename))  # 遍历所有邮件生成词库
+    freq = Counter(chain(*all_words))  # 统计词频
+    return [i[0] for i in freq.most_common(top_num)]  # 返回前 top_num 个高频词
+```
+### 3. 构建邮件的词向量 (vector 生成部分)
+```python
+vector = []
+for words in all_words:
+    word_map = list(map(lambda word: words.count(word), top_words))  # 统计每个特征词的词频
+    vector.append(word_map)
+vector = np.array(vector)  # 转换为 NumPy 数组
+```
+### 4.构建分类模型 (MultinomialNB Naive Bayes 模型)
+```python
+model = MultinomialNB()  # 初始化多项式朴素贝叶斯模型
+model.fit(vector, labels)  # 使用词频向量和标签进行训练
+```
+### 5. 对未知邮件进行分类 (predict 函数)
+```python
+def predict(filename):
+    words = get_words(filename)  # 预处理新邮件
+    current_vector = np.array(tuple(map(lambda word: words.count(word), top_words)))  # 生成词频向量
+    result = model.predict(current_vector.reshape(1, -1))  # 预测结果
+    return '垃圾邮件' if result == 1 else '普通邮件'
+```
+### 6. 使用 SMOTE 进行数据平衡（后续部分）
+```python
+smote = SMOTE(sampling_strategy='auto', random_state=42)
+X_res, y_res = smote.fit_resample(X_train, y_train)
+```
+## 高频词/TF-IDF两种特征模式的切换方法
+### 1.高频词 (Word Frequency) 特征模式
+ -高频词特征模式是指根据每个词在整个文本中的出现频率来表示文本。该方法简单直观，生成的特征向量通常是每个词在文本中出现的次数。
+### 2. TF-IDF 特征模式
+ -TF-IDF 是一种考虑到词频和逆文档频率的加权方法，它不仅反映了一个词在文档中的重要性，还考虑了词在整个语料库中的分布情况。
+### 3.如何切换
+ -可以通过调整文本特征提取的方式来在高频词和TF-IDF之间进行切换。通常使用 sklearn 提供的 CountVectorizer 和 TfidfVectorizer 来处理文本特征。
+ ```python
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+# 假设我们有一个文本数据集
+documents = [
+    "This is a spam message",
+    "This is a ham message",
+    "Free money is waiting for you",
+    "Win a lottery by sending your email",
 ]
+# 高频词特征模式：使用 CountVectorizer
+count_vectorizer = CountVectorizer(stop_words='english')
+X_count = count_vectorizer.fit_transform(documents)
+print("High-frequency features:")
+print(count_vectorizer.get_feature_names_out())  # 输出特征词汇
+# TF-IDF 特征模式：使用 TfidfVectorizer
+tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+X_tfidf = tfidf_vectorizer.fit_transform(documents)
+print("\nTF-IDF features:")
+print(tfidf_vectorizer.get_feature_names_out())  # 输出特征词汇
 ```
-### documents，包含三个中文字符串的列表，作为输入数据进行特征提取。
-## 6. 使用特征提取器
-```python
-# 选择特征提取方式  
-method = 'tf-idf'  # 可选 'tf-idf' 或 'count'；根据需要修改  
-
-# 创建特征提取器实例  
-extractor = FeatureExtractor(method)  
-
-# 提取特征  
-features = extractor.fit_transform(documents)
-```
-### 设置 method 为 'tf-idf' 或 'count'，创建 FeatureExtractor 的实例 extractor，调用 fit_transform 方法，使用示例数据提取特征。
-## 7. 输出特征名称和特征矩阵
-```python
-# 输出特征名称和特征矩阵  
-print("特征名称:", extractor.get_feature_names())  
-print("特征矩阵:\n", features.toarray())
-```
-### 调用 get_feature_names() 获取特征名称并输出，使用 toarray() 方法将特征矩阵转换为稠密数组并输出。
-![1](https://github.com/givenkills/-/blob/main/image/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-04-08%20211337.png)
-![2](https://github.com/givenkills/-/blob/main/image/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-04-08%20211356.png)
-# 高频词/TF-IDF两种特征模式的切换方法
-### 特征选择，监测模型在训练集和验证集上的表现，选择适合的特征方法。如果需要更强调文本的主题和语义信息，可以选择TF-IDF。混合使用，在某些情况下可以同时提取高频词和TF-IDF特征，将两者组合成训练集的特征。例如，可以将高频词作为基础特征，TF-IDF作为权重调整的特征，从而增强模型的表现。模型调优，在项目中进行实验，通过交叉验证评估不同特征提取方法的效果，选择最佳方案。动态切换，构建一个动态特征提取管道，根据输入数据的特点自动切换使用高频词还是TF-IDF。
 # 样本平衡处理
 ![3](https://github.com/hzh-hl/refactored-sniffle/blob/main/image/add.png)
 # 增加模型评估指标
