@@ -83,6 +83,6 @@ print("\nTF-IDF features:")
 print(tfidf_vectorizer.get_feature_names_out())  # 输出特征词汇
 ```
 # 样本平衡处理
-![3](https://github.com/hzh-hl/refactored-sniffle/blob/main/image/add.png)
+![3](https://github.com/hbw-hl/refactored-sniffle/blob/main/image/add.png)
 # 增加模型评估指标
-![4](https://github.com/hzh-hl/refactored-sniffle/blob/main/image/add.png)
+![4](https://github.com/hbw-hl/refactored-sniffle/blob/main/image/add.png)
